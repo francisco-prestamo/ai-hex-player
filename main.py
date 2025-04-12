@@ -94,9 +94,9 @@ class AstroBot(Player):
         self.num_play += 1 
 
         depth = 2
-        if self.num_play > 7:
+        if self.num_play > 14:
             depth = 4
-        elif self.num_play > 18:
+        elif self.num_play > 20:
             depth = 6
 
         n = board.size
