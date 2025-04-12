@@ -1,0 +1,84 @@
+\documentclass{article}
+\usepackage[spanish]{babel}
+\usepackage{amsmath}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{listings}
+
+\begin{document}
+
+\title{Implementación de Minmax para Hex}
+\author{Francisco Prestamo Bernardez}
+\date{}
+\maketitle
+
+\section{Descripción General}
+Un agente de IA simple para jugar al juego de tablero Hex en el cual se combinan diferentes estrategias y algoritmos para realizar movimientos óptimos dentro de restricciones de tiempo.
+
+\section{Componentes Principales}
+
+\subsection{Integración Python-C}
+\begin{itemize}
+    \item Utiliza \texttt{ctypes} para interactuar entre Python y C
+    \item Compila código C como biblioteca compartida para rendimiento
+    \item Gestiona memoria y transferencia de datos entre lenguajes
+\end{itemize}
+
+\subsection{Sistema de Toma de Decisiones}
+\begin{itemize}
+    \item Implementa algoritmo Minimax con poda alfa-beta
+    \item Profundidad de búsqueda configurable (predeterminado = 4)
+    \item Búsqueda limitada por tiempo mediante un hilo de tiempo de espera separado
+    \item Los primeros movimientos se manejan con estrategias especiales
+\end{itemize}
+
+\subsection{Evaluación del Tablero}
+
+La evaluación del tablero se basa en una combinación ponderada de cuatro heurísticas principales:
+
+\begin{enumerate}
+    \item Rango de Conectividad
+    \begin{itemize}
+        \item Corresponde al mayor rango alcanzado en el eje relevante (horizontal para el jugador 1, vertical para el jugador 2) dentro del conjunto disjunto del que forma parte la celda.
+        \item Representa la expansión máxima del grupo conectado del jugador.
+    \end{itemize}
+
+    \item Proximidad a Conexión Óptima
+    \begin{itemize}
+        \item Utiliza una métrica basada en el algoritmo de Dijkstra para estimar la distancia mínima desde la celda a ambos lados del tablero.
+        \item Una menor suma de distancias se considera más favorable.
+    \end{itemize}
+
+    \item Valor de Bloqueo
+    \begin{itemize}
+        \item Mide la cantidad de posiciones enemigas potencialmente bloqueadas desde la celda evaluada.
+        \item Favorece los movimientos que interrumpen la conectividad del oponente.
+    \end{itemize}
+
+    \item Conexiones Estratégicas
+    \begin{itemize}
+        \item Evalúa la capacidad de la celda para conectarse con otras piezas propias de valor estratégico.
+        \item Favorece la formación de caminos robustos o conexiones críticas.
+    \end{itemize}
+\end{enumerate}
+
+
+\subsection{Optimizaciones de Rendimiento}
+\begin{itemize}
+    \item Ordenamiento de movimientos usando QuickSort
+    \item Uso de Disjoint Set para detección de victoria
+    \item Terminación anticipada con poda alfa-beta
+    \item Exploración de movimientos basada en prioridades
+\end{itemize}
+
+
+\section{Uso}
+La IA puede utilizarse creando una instancia de la clase \texttt{AstroBot} con un ID de jugador (1 o 2) y llamando a su método \texttt{play()} con:
+\begin{itemize}
+    \item Estado actual del tablero
+    \item Límite de tiempo para el cálculo del movimiento
+\end{itemize}
+Nota: Es necesario estar en la carpeta del player y el archivo c al mismo tiempo para la ejecución del código
+
+\end{document}
