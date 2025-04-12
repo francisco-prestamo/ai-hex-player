@@ -1,24 +1,6 @@
 import ctypes
 import tempfile
 import os
-import io
-import sys
-import subprocess
-import random
-
-import tkinter as tk
-from tkinter import messagebox
-
-
-
-
-def print_board(board, n):
-    print([f" {i}" for i in range(n)])
-    for i in range(n):
-        print(" " * i, end="")
-        print(i,[ "🟥"if board[i][j] == 2 else "🟦" if board[i][j] == 1 else "⬜️" for j in range(n)])
-        print("")
-    print()
 
 
 class HexBoard:
@@ -109,9 +91,13 @@ class AstroBot(Player):
                 return row, col+1
             
         
-        self.num_play += 1
+        self.num_play += 1 
 
-        depth = 4
+        depth = 2
+        if self.num_play > 7:
+            depth = 4
+        elif self.num_play > 18:
+            depth = 6
 
         n = board.size
         c_board = (ctypes.POINTER(ctypes.c_int) * n)()
@@ -189,4 +175,3 @@ class Hex(HexBoard):
                 if self.board[0][col] == player_id and dfs(0, col):
                     return True
         return False
-

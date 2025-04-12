@@ -426,10 +426,10 @@ int count_blocked_positions(int **board, int n, int player, int i, int j) {
     int blocked_count = 0;
 
     if (player == 1) {
-        if (i > 0 && board[i - 1][j] == opponent) blocked_count++;
-        if (i < n - 1 && board[i + 1][j] == opponent) blocked_count++;
-        if (i > 0 && j < n - 1 && board[i - 1][j + 1] == opponent) blocked_count+=2;
-        if (i < n - 1 && j > 0 && board[i + 1][j - 1] == opponent) blocked_count+=2;
+        if (i > 0 && board[i - 1][j] == opponent) blocked_count+=2;
+        else if (i < n - 1 && board[i + 1][j] == opponent) blocked_count+=2;
+        else if (i > 0 && j < n - 1 && board[i - 1][j + 1] == opponent) blocked_count++;
+        else if (i < n - 1 && j > 0 && board[i + 1][j - 1] == opponent) blocked_count++;
 
         if (i > 1 && j < n - 1 && board[i - 2][j + 1] == opponent) blocked_count++;
         if (i < n - 2 && j > 0 && board[i + 2][j - 1] == opponent) blocked_count++;
@@ -437,14 +437,14 @@ int count_blocked_positions(int **board, int n, int player, int i, int j) {
         if (i > 0 && j < n - 2 && board[i - 1][j + 2] == opponent) blocked_count++;
         if (i < n - 1 && j > 1 && board[i + 1][j - 2] == opponent) blocked_count++;
 
-        if (i > 1 && board[i - 2][j] == opponent) blocked_count++;
-        if (i < n - 2 && board[i + 2][j] == opponent) blocked_count++;
+        if (i > 1 && board[i - 2][j] == opponent) blocked_count+=2;
+        if (i < n - 2 && board[i + 2][j] == opponent) blocked_count+=2;
     }
     if (player == 2) {
-        if (j > 0 && board[i][j - 1] == opponent) blocked_count++;
-        if (j < n - 1 && board[i][j + 1] == opponent) blocked_count++;
-        if (i > 0 && j < n - 1 && board[i - 1][j + 1] == opponent) blocked_count+=2;
-        if (i < n - 1 && j > 0 && board[i + 1][j - 1] == opponent) blocked_count+=2;
+        if (j > 0 && board[i][j - 1] == opponent) blocked_count+=2;
+        else if (j < n - 1 && board[i][j + 1] == opponent) blocked_count+=2;
+        else if (i > 0 && j < n - 1 && board[i - 1][j + 1] == opponent) blocked_count+=2;
+        else if (i < n - 1 && j > 0 && board[i + 1][j - 1] == opponent) blocked_count+=2;
 
         if (i > 1 && j < n - 1 && board[i - 2][j + 1] == opponent) blocked_count++;
         if (i < n - 2 && j > 0 && board[i + 2][j - 1] == opponent) blocked_count++;
@@ -452,8 +452,8 @@ int count_blocked_positions(int **board, int n, int player, int i, int j) {
         if (i > 0 && j < n - 2 && board[i - 1][j + 2] == opponent) blocked_count++;
         if (i < n - 1 && j > 1 && board[i + 1][j - 2] == opponent) blocked_count++;
 
-        if (j > 1 && board[i][j - 2] == opponent) blocked_count++;
-        if (j < n - 2 && board[i][j + 2] == opponent) blocked_count++;
+        if (j > 1 && board[i][j - 2] == opponent) blocked_count+=2;
+        if (j < n - 2 && board[i][j + 2] == opponent) blocked_count+=2;
     }
     return blocked_count;
 }
@@ -509,62 +509,6 @@ int evaluate_strategic_connection(int **board, int n, int player, int i, int j) 
 
     return score;
 }
-
-int evaluate_bridge_positions(int **board, int n, int player, int i, int j) {
-    if (board[i][j] != 0) return 0;
-    
-    int opponent = 3 - player;
-    int score = 0;
-    
-    // Define the six possible directions in hex grid
-    int dir[6][2] = {
-        {-1, 0},  // up
-        {1, 0},   // down
-        {0, -1},  // left
-        {0, 1},   // right
-        {-1, 1},  // up-right
-        {1, -1}   // down-left
-    };
-
-    // Check for bridge patterns
-    for (int d1 = 0; d1 < 6; d1++) {
-        int x1 = i + dir[d1][0];
-        int y1 = j + dir[d1][1];
-        
-        if (x1 < 0 || x1 >= n || y1 < 0 || y1 >= n) continue;
-        if (board[x1][y1] != player) continue;
-
-        // Found first friendly piece, look for second piece that could form bridge
-        for (int d2 = 0; d2 < 6; d2++) {
-            if (d2 == d1) continue;
-            
-            int x2 = i + dir[d2][0];
-            int y2 = j + dir[d2][1];
-            
-            if (x2 < 0 || x2 >= n || y2 < 0 || y2 >= n) continue;
-            if (board[x2][y2] != player) continue;
-
-            // Found potential bridge pattern, check alternate paths
-            int path1_x = x1 + dir[d2][0];
-            int path1_y = y1 + dir[d2][1];
-            int path2_x = x2 + dir[d1][0];
-            int path2_y = y2 + dir[d1][1];
-
-            // Verify paths are valid and at least one is empty
-            if (path1_x >= 0 && path1_x < n && path1_y >= 0 && path1_y < n &&
-                path2_x >= 0 && path2_x < n && path2_y >= 0 && path2_y < n) {
-                
-                if ((board[path1_x][path1_y] == 0 && board[path2_x][path2_y] == opponent) ||
-                    (board[path1_x][path1_y] == opponent && board[path2_x][path2_y] == 0)) {
-                    score += 2;  // High priority for defending bridges
-                }
-            }
-        }
-    }
-    
-    return score;
-}
-
 
 // Main depth-0 analysis function
 MoveResult analyze_depth_zero(int **board, int n, int player, int is_max, 
@@ -723,10 +667,63 @@ MoveResult minimax(int **board, int n, int depth, int alpha, int beta, int is_ma
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
             if (board[i][j] == 0) {
-                heuristics[i][j] = (n * n - heuristics1[i][j] - heuristics2[i][j]) / max(1, max_heuristic)
-                    + 0.6 * count_blocked_positions(board, n, player, i, j) / max(1, max_blocked_positions)
-                    + 1.2 * evaluate_strategic_connection(board, n, player, i, j) / max(1, max_strategic_connection)
-                    + 0.8 * evaluate_bridge_positions(board,n,player,i,j);
+                board[i][j] = is_max ? player : 3 - player;
+
+                HexDisjointSet* temp_ds1 = create_hex_disjoint_set(n);
+                HexDisjointSet* temp_ds2 = create_hex_disjoint_set(n);
+                for (int x = 0; x < n; x++) {
+                    for (int y = 0; y < n; y++) {
+                        temp_ds1->sets[x][y] = ds1->sets[x][y];
+                        temp_ds2->sets[x][y] = ds2->sets[x][y];
+                    }
+                }
+
+                int adj[6][2], count;
+                get_adjacent(n, i, j, adj, is_max, &count);
+                for (int k = 0; k < count; k++) {
+                    int ni = adj[k][0], nj = adj[k][1];
+                    if (board[ni][nj] == board[i][j]) {
+                        if (board[i][j] == 1) {
+                            union_sets(ds1, i, j, ni, nj);
+                        } else {
+                            union_sets(ds2, i, j, ni, nj);
+                        }
+                    }
+                }
+
+                if(player == 1){
+                    int max_j_range = get_max_j_range(temp_ds1);
+                    heuristics[i][j] = max_j_range*1
+                        + 4 *(n * n - heuristics1[i][j] - heuristics2[i][j]) / max(1, max_heuristic)
+                        + 6  * count_blocked_positions(board, n, player, i, j) / max(1, max_blocked_positions)
+                        + 2 * evaluate_strategic_connection(board, n, player, i, j) / max(1, max_strategic_connection);
+                }else{
+                    int max_i_range = get_max_i_range(temp_ds2);
+                    heuristics[i][j] = max_i_range*1
+                        + 4 *(n * n - heuristics1[i][j] - heuristics2[i][j]) / max(1, max_heuristic)
+                        + 6 * count_blocked_positions(board, n, player, i, j) / max(1, max_blocked_positions)
+                        + 2 * evaluate_strategic_connection(board, n, player, i, j) / max(1, max_strategic_connection);
+                }
+
+                board[i][j] = 0;
+
+                for (int x = 0; x < n; x++) {
+                    for (int y = 0; y < n; y++) {
+                        ds1->sets[x][y] = temp_ds1->sets[x][y];
+                        ds2->sets[x][y] = temp_ds2->sets[x][y];
+                    }
+                }
+
+                // Free temporary disjoint sets
+                for (int x = 0; x < n; x++) {
+                    free(temp_ds1->sets[x]);
+                    free(temp_ds2->sets[x]);
+                }
+                free(temp_ds1->sets);
+                free(temp_ds2->sets);
+                free(temp_ds1);
+                free(temp_ds2);
+
             } else {
                 heuristics[i][j] = -INF;
             }
@@ -745,7 +742,7 @@ MoveResult minimax(int **board, int n, int depth, int alpha, int beta, int is_ma
     free(path_counts1);
     free(path_counts2);
 
-
+    
     
     // Depth 0 analisis:
     if (!(*stop_flag) && depth == 0) {
@@ -777,7 +774,7 @@ MoveResult minimax(int **board, int n, int depth, int alpha, int beta, int is_ma
         int i = moves[m][0], j = moves[m][1];
 
         if(board[i][j] != 0) continue; 
-        // printf("Exploring move (%d, %d) depth %d\\n", i, j,depth);
+
         board[i][j] = is_max ? player : 3 - player;
 
         // Store the state of the disjoint sets before modification
@@ -812,11 +809,6 @@ MoveResult minimax(int **board, int n, int depth, int alpha, int beta, int is_ma
         }
 
         board[i][j] = 0;
-
-        if(depth>2){
-            printf("Exploring move (%d, %d) depth %d score %f\n", i, j,depth, curr.score);
-        }
-       
 
         for (int x = 0; x < n; x++) {
             for (int y = 0; y < n; y++) {
